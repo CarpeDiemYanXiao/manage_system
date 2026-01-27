@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.housekeeping.housekeeping.mapper.AssessMapper">
+
+    <resultMap type="Assess" id="AssessResult">
+        <result property="assessId"    column="assess_id"    />
+        <result property="reservationId"    column="reservation_id"    />
+        <result property="score"    column="score"    />
+        <result property="content"    column="content"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="goIndex"    column="go_index"    />
+        <result property="staffId"    column="staff_id"    />
+        <result property="serveName"    column="serve_name"    />
+        <result property="customerName"    column="customer_name"    />
+        <result property="customerAvatar"    column="customer_avatar"    />
+        <result property="userName"    column="user_name"    />
+        <result property="avatar"    column="avatar"    />
+    </resultMap>
+
+    <sql id="selectAssessVo">
+        select assess_id, reservation_id, score, content, create_time, go_index from assess
+    </sql>
+
+    <select id="selectAssessList" parameterType="Assess" resultMap="AssessResult">
+        select a.assess_id, a.reservation_id, a.score, a.content, a.create_time, a.go_index,
+               r.user_id, r.staff_id,
+               u.user_name, u.avatar,
+               u.nick_name as customer_name, u.avatar as customer_avatar,
+               s.name as serve_name
+        from assess a
+        left join reservation r on a.reservation_id = r.reservation_id
+        left join sys_user u on r.user_id = u.user_id
+        left join serve s on r.serve_id = s.serve_id
+        <where>
+            <if test="reservationId != null  and reservationId != ''"> and a.reservation_id = #{reservationId}</if>
+            <if test="goIndex != null  and goIndex != ''"> and a.go_index = #{goIndex}</if>
+            <if test="staffId != null  and staffId != ''"> and r.staff_id = #{staffId}</if>
+        </where>
+        order by a.create_time desc
+    </select>
+
+    <select id="selectAssessByAssessId" parameterType="String" resultMap="AssessResult">
+        <include refid="selectAssessVo"/>
+        where assess_id = #{assessId}
+    </select>
+
+    <insert id="insertAssess" parameterType="Assess">
+        insert into assess
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="assessId != null">assess_id,</if>
+            <if test="reservationId != null and reservationId != ''">reservation_id,</if>
+            <if test="score != null">score,</if>
+            <if test="content != null">content,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="goIndex != null and goIndex != ''">go_index,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="assessId != null">#{assessId},</if>
+            <if test="reservationId != null and reservationId != ''">#{reservationId},</if>
+            <if test="score != null">#{score},</if>
+            <if test="content != null">#{content},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="goIndex != null and goIndex != ''">#{goIndex},</if>
+         </trim>
+    </insert>
+
+    <update id="updateAssess" parameterType="Assess">
+        update assess
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="reservationId != null and reservationId != ''">reservation_id = #{reservationId},</if>
+            <if test="score != null">score = #{score},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="goIndex != null and goIndex != ''">go_index = #{goIndex},</if>
+        </trim>
+        where assess_id = #{assessId}
+    </update>
+
+    <delete id="deleteAssessByAssessId" parameterType="String">
+        delete from assess where assess_id = #{assessId}
+    </delete>
+
+    <delete id="deleteAssessByAssessIds" parameterType="String">
+        delete from assess where assess_id in
+        <foreach item="assessId" collection="array" open="(" separator="," close=")">
+            #{assessId}
+        </foreach>
+    </delete>
+</mapper>
+

@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.housekeeping.housekeeping.mapper.ServeMapper">
+    
+    <resultMap type="Serve" id="ServeResult">
+        <result property="serveId"    column="serve_id"    />
+        <result property="name"    column="name"    />
+        <result property="category"    column="category"    />
+        <result property="image"    column="image"    />
+        <result property="description"    column="description"    />
+        <result property="price"    column="price"    />
+        <result property="tag"    column="tag"    />
+        <result property="createTime"    column="create_time"    />
+    </resultMap>
+
+    <sql id="selectServeVo">
+        select serve_id, name, category, image, description, price, tag, create_time from serve
+    </sql>
+
+    <select id="selectServeList" parameterType="Serve" resultMap="ServeResult">
+        <include refid="selectServeVo"/>
+        <where>  
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="category != null  and category != ''"> and category = #{category}</if>
+        </where>
+    </select>
+    
+    <select id="selectServeByServeId" parameterType="String" resultMap="ServeResult">
+        <include refid="selectServeVo"/>
+        where serve_id = #{serveId}
+    </select>
+
+    <insert id="insertServe" parameterType="Serve">
+        insert into serve
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="serveId != null">serve_id,</if>
+            <if test="name != null and name != ''">name,</if>
+            <if test="category != null and category != ''">category,</if>
+            <if test="image != null and image != ''">image,</if>
+            <if test="description != null and description != ''">description,</if>
+            <if test="price != null">price,</if>
+            <if test="tag != null and tag != ''">tag,</if>
+            <if test="createTime != null">create_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="serveId != null">#{serveId},</if>
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="category != null and category != ''">#{category},</if>
+            <if test="image != null and image != ''">#{image},</if>
+            <if test="description != null and description != ''">#{description},</if>
+            <if test="price != null">#{price},</if>
+            <if test="tag != null and tag != ''">#{tag},</if>
+            <if test="createTime != null">#{createTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateServe" parameterType="Serve">
+        update serve
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="category != null and category != ''">category = #{category},</if>
+            <if test="image != null and image != ''">image = #{image},</if>
+            <if test="description != null and description != ''">description = #{description},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="tag != null and tag != ''">tag = #{tag},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+        </trim>
+        where serve_id = #{serveId}
+    </update>
+
+    <delete id="deleteServeByServeId" parameterType="String">
+        delete from serve where serve_id = #{serveId}
+    </delete>
+
+    <delete id="deleteServeByServeIds" parameterType="String">
+        delete from serve where serve_id in 
+        <foreach item="serveId" collection="array" open="(" separator="," close=")">
+            #{serveId}
+        </foreach>
+    </delete>
+</mapper>

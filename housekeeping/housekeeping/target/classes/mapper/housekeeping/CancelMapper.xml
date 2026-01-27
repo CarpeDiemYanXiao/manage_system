@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.housekeeping.housekeeping.mapper.CancelMapper">
+    
+    <resultMap type="Cancel" id="CancelResult">
+        <result property="cancelId"    column="cancel_id"    />
+        <result property="reservationId"    column="reservation_id"    />
+        <result property="reason"    column="reason"    />
+        <result property="notes"    column="notes"    />
+        <result property="createTime"    column="create_time"    />
+    </resultMap>
+
+    <sql id="selectCancelVo">
+        select cancel_id, reservation_id, reason, notes, create_time from cancel
+    </sql>
+
+    <select id="selectCancelList" parameterType="Cancel" resultMap="CancelResult">
+        <include refid="selectCancelVo"/>
+        <where>  
+            <if test="reservationId != null  and reservationId != ''"> and reservation_id = #{reservationId}</if>
+            <if test="reason != null  and reason != ''"> and reason = #{reason}</if>
+        </where>
+    </select>
+    
+    <select id="selectCancelByCancelId" parameterType="String" resultMap="CancelResult">
+        <include refid="selectCancelVo"/>
+        where cancel_id = #{cancelId}
+    </select>
+
+    <insert id="insertCancel" parameterType="Cancel">
+        insert into cancel
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="cancelId != null">cancel_id,</if>
+            <if test="reservationId != null and reservationId != ''">reservation_id,</if>
+            <if test="reason != null and reason != ''">reason,</if>
+            <if test="notes != null">notes,</if>
+            <if test="createTime != null">create_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="cancelId != null">#{cancelId},</if>
+            <if test="reservationId != null and reservationId != ''">#{reservationId},</if>
+            <if test="reason != null and reason != ''">#{reason},</if>
+            <if test="notes != null">#{notes},</if>
+            <if test="createTime != null">#{createTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateCancel" parameterType="Cancel">
+        update cancel
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="reservationId != null and reservationId != ''">reservation_id = #{reservationId},</if>
+            <if test="reason != null and reason != ''">reason = #{reason},</if>
+            <if test="notes != null">notes = #{notes},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+        </trim>
+        where cancel_id = #{cancelId}
+    </update>
+
+    <delete id="deleteCancelByCancelId" parameterType="String">
+        delete from cancel where cancel_id = #{cancelId}
+    </delete>
+
+    <delete id="deleteCancelByCancelIds" parameterType="String">
+        delete from cancel where cancel_id in 
+        <foreach item="cancelId" collection="array" open="(" separator="," close=")">
+            #{cancelId}
+        </foreach>
+    </delete>
+</mapper>

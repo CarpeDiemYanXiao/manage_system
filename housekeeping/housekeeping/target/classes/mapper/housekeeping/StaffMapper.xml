@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.housekeeping.housekeeping.mapper.StaffMapper">
+    
+    <resultMap type="Staff" id="StaffResult">
+        <result property="staffId"    column="staff_id"    />
+        <result property="name"    column="name"    />
+        <result property="gender"    column="gender"    />
+        <result property="phone"    column="phone"    />
+        <result property="photo"    column="photo"    />
+        <result property="staffType"    column="staff_type"    />
+        <result property="status"    column="status"    />
+        <result property="createTime"    column="create_time"    />
+    </resultMap>
+
+    <sql id="selectStaffVo">
+        select staff_id, name, gender, phone, photo, staff_type, status, create_time from staff
+    </sql>
+
+    <select id="selectStaffList" parameterType="Staff" resultMap="StaffResult">
+        select staff_id, name, gender, phone, photo, staff_type, status, create_time from staff
+        <where>  
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="gender != null  and gender != ''"> and gender = #{gender}</if>
+            <if test="staffType != null  and staffType != ''"> and staff_type = #{staffType}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectStaffByStaffId" parameterType="String" resultMap="StaffResult">
+        <include refid="selectStaffVo"/>
+        where staff_id = #{staffId}
+    </select>
+
+    <select id="selectStaffByUsername" parameterType="String" resultMap="StaffResult">
+        <include refid="selectStaffVo"/>
+        where name = #{username}
+    </select>
+
+    <select id="checkUsernameUnique" parameterType="String" resultType="int">
+        select count(1) from staff where name = #{username} limit 1
+    </select>
+
+    <insert id="insertStaff" parameterType="Staff">
+        insert into staff
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="staffId != null">staff_id,</if>
+            <if test="name != null and name != ''">name,</if>
+            <if test="gender != null and gender != ''">gender,</if>
+            <if test="phone != null and phone != ''">phone,</if>
+            <if test="photo != null and photo != ''">photo,</if>
+            <if test="staffType != null and staffType != ''">staff_type,</if>
+            <if test="status != null and status != ''">status,</if>
+            <if test="createTime != null">create_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="staffId != null">#{staffId},</if>
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="gender != null and gender != ''">#{gender},</if>
+            <if test="phone != null and phone != ''">#{phone},</if>
+            <if test="photo != null and photo != ''">#{photo},</if>
+            <if test="staffType != null and staffType != ''">#{staffType},</if>
+            <if test="status != null and status != ''">#{status},</if>
+            <if test="createTime != null">#{createTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateStaff" parameterType="Staff">
+        update staff
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="gender != null and gender != ''">gender = #{gender},</if>
+            <if test="phone != null and phone != ''">phone = #{phone},</if>
+            <if test="photo != null and photo != ''">photo = #{photo},</if>
+            <if test="staffType != null and staffType != ''">staff_type = #{staffType},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+        </trim>
+        where staff_id = #{staffId}
+    </update>
+
+    <delete id="deleteStaffByStaffId" parameterType="String">
+        delete from staff where staff_id = #{staffId}
+    </delete>
+
+    <delete id="deleteStaffByStaffIds" parameterType="String">
+        delete from staff where staff_id in 
+        <foreach item="staffId" collection="array" open="(" separator="," close=")">
+            #{staffId}
+        </foreach>
+    </delete>
+</mapper>

@@ -1,0 +1,305 @@
+<template>
+    <div class="app-container">
+        <!-- 顶部搜索 -->
+        <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
+            <el-form-item label="订单编号" prop="reservationId">
+                <el-input
+                        v-model="queryParams.reservationId"
+                        placeholder="请输入订单编号"
+                        clearable
+                        @keyup.enter="handleQuery"
+                />
+            </el-form-item>
+            <el-form-item label="取消原因" prop="reason">
+                <el-select v-model="queryParams.reason" placeholder="请选择取消原因" clearable style="width: 200px;">
+                    <el-option
+                            v-for="dict in cancel_reason"
+                            :key="dict.value"
+                            :label="dict.label"
+                            :value="dict.value"
+                    />
+                </el-select>
+            </el-form-item>
+            <el-form-item>
+                <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
+                <el-button icon="Refresh" @click="resetQuery">重置</el-button>
+            </el-form-item>
+        </el-form>
+
+        <!-- 顶部按钮 -->
+        <el-row :gutter="10" class="mb8">
+            <el-col :span="1.5">
+                <el-button
+                        type="primary"
+                        plain
+                        icon="Plus"
+                        @click="handleAdd"
+                        v-hasPermi="['housekeeping:cancel:add']"
+                >新增
+                </el-button>
+            </el-col>
+            <el-col :span="1.5">
+                <el-button
+                        type="success"
+                        plain
+                        icon="Edit"
+                        :disabled="single"
+                        @click="handleUpdate"
+                        v-hasPermi="['housekeeping:cancel:edit']"
+                >修改
+                </el-button>
+            </el-col>
+            <el-col :span="1.5">
+                <el-button
+                        type="danger"
+                        plain
+                        icon="Delete"
+                        :disabled="multiple"
+                        @click="handleDelete"
+                        v-hasPermi="['housekeeping:cancel:remove']"
+                >删除
+                </el-button>
+            </el-col>
+            <el-col :span="1.5">
+                <el-button
+                        type="warning"
+                        plain
+                        icon="Download"
+                        @click="handleExport"
+                        v-hasPermi="['housekeeping:cancel:export']"
+                >导出
+                </el-button>
+            </el-col>
+            <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
+        </el-row>
+
+        <!-- 表格 -->
+        <el-table @row-click="clickRow" ref="table" highlight-current-row
+                  border v-loading="loading" :data="cancelList" @selection-change="handleSelectionChange">
+            <el-table-column type="selection" width="55" align="center"/>
+            <el-table-column label="序号" align="center" type="index" :index="indexMethod"/>
+            <el-table-column label="订单编号" align="center" prop="reservationId"/>
+            <el-table-column label="取消原因" align="center" prop="reason">
+                <template #default="scope">
+                    <dict-tag :options="cancel_reason" :value="scope.row.reason"/>
+                </template>
+            </el-table-column>
+            <el-table-column label="备注" align="center" prop="notes"/>
+            <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+                <template #default="scope">
+                    <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)"
+                               v-hasPermi="['housekeeping:cancel:edit']">修改
+                    </el-button>
+                    <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)"
+                               v-hasPermi="['housekeeping:cancel:remove']">删除
+                    </el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+
+        <!-- 分页组件 -->
+        <pagination
+                v-show="total>0"
+                :total="total"
+                v-model:page="queryParams.pageNum"
+                v-model:limit="queryParams.pageSize"
+                @pagination="getList"
+        />
+
+        <!-- 添加或修改取消记录对话框 -->
+        <vxe-modal :title="title" v-model="open" width="500px" show-maximize showFooter resize>
+            <el-form ref="cancelRef" :model="form" :rules="rules" label-width="80px">
+                <el-form-item label="订单编号" prop="reservationId">
+                    <el-input v-model="form.reservationId" placeholder="请输入订单编号"/>
+                </el-form-item>
+                <el-form-item label="取消原因" prop="reason">
+                    <el-select v-model="form.reason" placeholder="请选择取消原因">
+                        <el-option
+                                v-for="dict in cancel_reason"
+                                :key="dict.value"
+                                :label="dict.label"
+                                :value="dict.value"
+                        ></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="备注" prop="notes">
+                    <el-input v-model="form.notes" type="textarea" placeholder="请输入内容"/>
+                </el-form-item>
+            </el-form>
+            <template #footer>
+                <div class="dialog-footer">
+                    <el-button type="primary" @click="submitForm">确 定</el-button>
+                    <el-button @click="cancel">取 消</el-button>
+                </div>
+            </template>
+        </vxe-modal>
+    </div>
+</template>
+
+<script setup name="Cancel">
+import {listCancel, getCancel, delCancel, addCancel, updateCancel} from "@/api/housekeeping/cancel"
+import {getToken} from "@/utils/auth.js";
+
+const baseURL = import.meta.env.VITE_APP_BASE_API
+
+const {proxy} = getCurrentInstance()
+const {cancel_reason} = proxy.useDict('cancel_reason')
+
+const cancelList = ref([])
+const open = ref(false)
+const loading = ref(true)
+const showSearch = ref(true)
+const ids = ref([])
+const single = ref(true)
+const multiple = ref(true)
+const total = ref(0)
+const title = ref("")
+const selectedRow = ref(null)
+
+const data = reactive({
+    form: {},
+    queryParams: {
+        pageNum: 1,
+        pageSize: 10,
+        reservationId: null,
+        reason: null,
+    },
+    rules: {
+        reservationId: [
+            {required: true, message: "订单编号不能为空", trigger: "blur"}
+        ],
+        reason: [
+            {required: true, message: "取消原因不能为空", trigger: "change"}
+        ],
+    },
+})
+
+const {queryParams, form, rules} = toRefs(data)
+
+//点击行 获取行
+const clickRow = (row) => {
+    selectedRow.value = row; // 更新选中的行
+    const table = proxy.$refs.table;
+    // 清除所有已选中的行
+    table.clearSelection();
+    // 选中当前点击的行
+    table.toggleRowSelection(row, true);
+}
+
+/** 自定义序号 */
+const indexMethod = (index) => {
+    let pageNum = queryParams.value.pageNum - 1;
+    if ((pageNum !== -1 && pageNum !== 0)) {
+        return (index + 1) + (pageNum * queryParams.value.pageSize);
+    } else {
+        return (index + 1)
+    }
+}
+
+/** 查询取消记录列表 */
+const getList = () => {
+    loading.value = true
+    listCancel(queryParams.value).then(response => {
+        cancelList.value = response.rows
+        total.value = response.total
+        loading.value = false
+    })
+}
+
+// 取消按钮
+const cancel = () => {
+    open.value = false
+    reset()
+}
+
+// 表单重置
+const reset = () => {
+    form.value = {
+        cancelId: null,
+        reservationId: null,
+        reason: null,
+        notes: null,
+        createTime: null
+    }
+    proxy.resetForm("cancelRef")
+}
+
+/** 搜索按钮操作 */
+const handleQuery = () => {
+    queryParams.value.pageNum = 1
+    getList()
+}
+
+/** 重置按钮操作 */
+const resetQuery = () => {
+    proxy.resetForm("queryRef")
+    handleQuery()
+}
+
+// 多选框选中数据
+const handleSelectionChange = (selection) => {
+    ids.value = selection.map(item => item.cancelId)
+    single.value = selection.length != 1
+    multiple.value = !selection.length
+}
+
+/** 新增按钮操作 */
+const handleAdd = () => {
+    reset()
+    open.value = true
+    title.value = "添加取消记录"
+}
+
+/** 修改按钮操作 */
+const handleUpdate = (row) => {
+    reset()
+    const _cancelId = row.cancelId || ids.value
+    getCancel(_cancelId).then(response => {
+        form.value = response.data
+        open.value = true
+        title.value = "修改取消记录"
+    })
+}
+
+/** 提交按钮 */
+const submitForm = () => {
+    proxy.$refs["cancelRef"].validate(valid => {
+        if (valid) {
+            if (form.value.cancelId != null) {
+                updateCancel(form.value).then(response => {
+                    proxy.$modal.msgSuccess("修改成功")
+                    open.value = false
+                    getList()
+                })
+            } else {
+                addCancel(form.value).then(response => {
+                    proxy.$modal.msgSuccess("新增成功")
+                    open.value = false
+                    getList()
+                })
+            }
+        }
+    })
+}
+
+/** 删除按钮操作 */
+const handleDelete = (row) => {
+    const _cancelIds = row.cancelId || ids.value
+    proxy.$modal.confirm('是否确认删除该项数据？').then(function () {
+        return delCancel(_cancelIds)
+    }).then(() => {
+        getList()
+        proxy.$modal.msgSuccess("删除成功")
+    }).catch(() => {
+    })
+}
+
+/** 导出按钮操作 */
+const handleExport = () => {
+    proxy.download('housekeeping/cancel/export', {
+        ...queryParams.value
+    }, `cancel_${new Date().getTime()}.xlsx`)
+}
+
+getList()
+</script>

@@ -1,0 +1,234 @@
+<template>
+  <div class="register">
+    <el-form ref="registerRef" :model="registerForm" :rules="registerRules" class="register-form">
+      <h3 class="title">家政人员注册</h3>
+      <el-form-item prop="username">
+        <el-input
+          v-model="registerForm.username"
+          type="text"
+          size="large"
+          auto-complete="off"
+          placeholder="账号"
+        >
+          <template #prefix><svg-icon icon-class="user" class="el-input__icon input-icon" /></template>
+        </el-input>
+      </el-form-item>
+      <el-form-item prop="name">
+        <el-input
+          v-model="registerForm.name"
+          type="text"
+          size="large"
+          auto-complete="off"
+          placeholder="姓名"
+        >
+          <template #prefix><svg-icon icon-class="user" class="el-input__icon input-icon" /></template>
+        </el-input>
+      </el-form-item>
+      <el-form-item prop="phone">
+        <el-input
+          v-model="registerForm.phone"
+          type="text"
+          size="large"
+          auto-complete="off"
+          placeholder="手机号"
+        >
+          <template #prefix><svg-icon icon-class="phone" class="el-input__icon input-icon" /></template>
+        </el-input>
+      </el-form-item>
+      <el-form-item prop="staffType">
+        <el-select
+          v-model="registerForm.staffType"
+          placeholder="请选择服务类型"
+          size="large"
+          style="width: 100%"
+        >
+          <el-option label="家庭保洁" value="家庭保洁" />
+          <el-option label="家电清洗" value="家电清洗" />
+          <el-option label="月嫂服务" value="月嫂服务" />
+          <el-option label="育婴师" value="育婴师" />
+          <el-option label="保姆" value="保姆" />
+          <el-option label="老人护理" value="老人护理" />
+          <el-option label="钟点工" value="钟点工" />
+          <el-option label="其他" value="其他" />
+        </el-select>
+      </el-form-item>
+      <el-form-item prop="password">
+        <el-input
+          v-model="registerForm.password"
+          type="password"
+          size="large"
+          auto-complete="off"
+          placeholder="密码"
+          show-password
+        >
+          <template #prefix><svg-icon icon-class="password" class="el-input__icon input-icon" /></template>
+        </el-input>
+      </el-form-item>
+      <el-form-item prop="confirmPassword">
+        <el-input
+          v-model="registerForm.confirmPassword"
+          type="password"
+          size="large"
+          auto-complete="off"
+          placeholder="确认密码"
+          show-password
+          @keyup.enter="handleRegister"
+        >
+          <template #prefix><svg-icon icon-class="password" class="el-input__icon input-icon" /></template>
+        </el-input>
+      </el-form-item>
+      <el-form-item style="width:100%;">
+        <el-button
+          :loading="loading"
+          size="large"
+          type="primary"
+          style="width:100%;"
+          @click.prevent="handleRegister"
+        >
+          <span v-if="!loading">注 册</span>
+          <span v-else>注 册 中...</span>
+        </el-button>
+        <div style="float: right;">
+          <router-link class="link-type" :to="'/login'">使用已有账户登录</router-link>
+        </div>
+      </el-form-item>
+    </el-form>
+  </div>
+</template>
+
+<script setup>
+import { ElMessageBox } from "element-plus"
+import { register } from "@/api/login"
+
+const router = useRouter()
+const { proxy } = getCurrentInstance()
+
+const registerForm = ref({
+  username: "",
+  name: "",
+  phone: "",
+  staffType: "",
+  password: "",
+  confirmPassword: ""
+})
+
+const equalToPassword = (rule, value, callback) => {
+  if (registerForm.value.password !== value) {
+    callback(new Error("两次输入的密码不一致"))
+  } else {
+    callback()
+  }
+}
+
+const registerRules = {
+  username: [
+    { required: true, trigger: "blur", message: "请输入您的账号" },
+    { min: 2, max: 20, message: "用户账号长度必须介于 2 和 20 之间", trigger: "blur" }
+  ],
+  name: [
+    { required: true, trigger: "blur", message: "请输入您的姓名" }
+  ],
+  phone: [
+    { required: true, trigger: "blur", message: "请输入您的手机号" },
+    { pattern: /^1[3-9]\d{9}$/, message: "请输入正确的手机号", trigger: "blur" }
+  ],
+  staffType: [
+    { required: true, trigger: "change", message: "请选择服务类型" }
+  ],
+  password: [
+    { required: true, trigger: "blur", message: "请输入您的密码" },
+    { min: 5, max: 20, message: "用户密码长度必须介于 5 和 20 之间", trigger: "blur" },
+    { pattern: /^[^<>"'|\\]+$/, message: "不能包含非法字符：< > \" ' \\ |", trigger: "blur" }
+  ],
+  confirmPassword: [
+    { required: true, trigger: "blur", message: "请再次输入您的密码" },
+    { required: true, validator: equalToPassword, trigger: "blur" }
+  ]
+}
+
+const loading = ref(false)
+
+function handleRegister() {
+  proxy.$refs.registerRef.validate(valid => {
+    if (valid) {
+      loading.value = true
+      register(registerForm.value).then(res => {
+        const username = registerForm.value.username
+        ElMessageBox.alert("<font color='red'>恭喜你，您的账号 " + username + " 注册成功！</font>", "系统提示", {
+          dangerouslyUseHTMLString: true,
+          type: "success",
+        }).then(() => {
+          router.push("/login")
+        }).catch(() => {})
+      }).catch((error) => {
+        loading.value = false
+        proxy.$modal.msgError(error.msg || "注册失败")
+      })
+    }
+  })
+}
+</script>
+
+<style lang='scss' scoped>
+.register {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  background-image: url("../assets/images/login-background.jpg");
+  background-size: cover;
+}
+.title {
+  margin: 0px auto 30px auto;
+  text-align: center;
+  color: #707070;
+}
+
+.register-form {
+  border-radius: 6px;
+  background: #ffffff;
+  width: 400px;
+  padding: 25px 25px 5px 25px;
+  .el-input {
+    height: 40px;
+    input {
+      height: 40px;
+    }
+  }
+  .input-icon {
+    height: 39px;
+    width: 14px;
+    margin-left: 0px;
+  }
+}
+.register-tip {
+  font-size: 13px;
+  text-align: center;
+  color: #bfbfbf;
+}
+.register-code {
+  width: 33%;
+  height: 40px;
+  float: right;
+  img {
+    cursor: pointer;
+    vertical-align: middle;
+  }
+}
+.el-register-footer {
+  height: 40px;
+  line-height: 40px;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
+  color: #fff;
+  font-family: Arial;
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+.register-code-img {
+  height: 40px;
+  padding-left: 12px;
+}
+</style>
