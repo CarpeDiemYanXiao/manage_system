@@ -11,10 +11,11 @@ import usePermissionStore from '@/store/modules/permission'
 
 NProgress.configure({ showSpinner: false })
 
+// 不需要登录的白名单
 const whiteList = ['/login', '/register']
 
 const isWhiteList = (path) => {
-  return whiteList.some(pattern => isPathMatch(pattern, path))
+  return whiteList.some(pattern => isPathMatch(pattern, path) || path.startsWith('/booking/'))
 }
 
 router.beforeEach((to, from, next) => {
@@ -23,10 +24,8 @@ router.beforeEach((to, from, next) => {
     to.meta.title && useSettingsStore().setTitle(to.meta.title)
     /* has token*/
     if (to.path === '/login') {
-      next({ path: '/' })
+      next({ path: '/index/home' })
       NProgress.done()
-    } else if (isWhiteList(to.path)) {
-      next()
     } else {
       if (useUserStore().roles.length === 0) {
         isRelogin.show = true
@@ -45,7 +44,7 @@ router.beforeEach((to, from, next) => {
         }).catch(err => {
           useUserStore().logOut().then(() => {
             ElMessage.error(err)
-            next({ path: '/' })
+            next({ path: '/login' })
           })
         })
       } else {
