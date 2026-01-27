@@ -6,26 +6,32 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     
     <resultMap type="Staff" id="StaffResult">
         <result property="staffId"    column="staff_id"    />
+        <result property="username"    column="username"    />
+        <result property="password"    column="password"    />
         <result property="name"    column="name"    />
         <result property="gender"    column="gender"    />
         <result property="phone"    column="phone"    />
         <result property="photo"    column="photo"    />
         <result property="staffType"    column="staff_type"    />
+        <result property="skills"    column="skills"    />
+        <result property="introduction"    column="introduction"    />
         <result property="status"    column="status"    />
+        <result property="accountStatus"    column="account_status"    />
         <result property="createTime"    column="create_time"    />
     </resultMap>
 
     <sql id="selectStaffVo">
-        select staff_id, name, gender, phone, photo, staff_type, status, create_time from staff
+        select staff_id, username, password, name, gender, phone, photo, staff_type, skills, introduction, status, account_status, create_time from staff
     </sql>
 
     <select id="selectStaffList" parameterType="Staff" resultMap="StaffResult">
-        select staff_id, name, gender, phone, photo, staff_type, status, create_time from staff
+        select staff_id, username, name, gender, phone, photo, staff_type, skills, introduction, status, account_status, create_time from staff
         <where>  
             <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
             <if test="gender != null  and gender != ''"> and gender = #{gender}</if>
             <if test="staffType != null  and staffType != ''"> and staff_type = #{staffType}</if>
             <if test="status != null  and status != ''"> and status = #{status}</if>
+            <if test="accountStatus != null  and accountStatus != ''"> and account_status = #{accountStatus}</if>
         </where>
         order by create_time desc
     </select>
@@ -37,33 +43,43 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <select id="selectStaffByUsername" parameterType="String" resultMap="StaffResult">
         <include refid="selectStaffVo"/>
-        where name = #{username}
+        where username = #{username}
     </select>
 
     <select id="checkUsernameUnique" parameterType="String" resultType="int">
-        select count(1) from staff where name = #{username} limit 1
+        select count(1) from staff where username = #{username} limit 1
     </select>
 
     <insert id="insertStaff" parameterType="Staff">
         insert into staff
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="staffId != null">staff_id,</if>
+            <if test="username != null and username != ''">username,</if>
+            <if test="password != null and password != ''">password,</if>
             <if test="name != null and name != ''">name,</if>
             <if test="gender != null and gender != ''">gender,</if>
             <if test="phone != null and phone != ''">phone,</if>
             <if test="photo != null and photo != ''">photo,</if>
             <if test="staffType != null and staffType != ''">staff_type,</if>
+            <if test="skills != null and skills != ''">skills,</if>
+            <if test="introduction != null and introduction != ''">introduction,</if>
             <if test="status != null and status != ''">status,</if>
+            <if test="accountStatus != null and accountStatus != ''">account_status,</if>
             <if test="createTime != null">create_time,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="staffId != null">#{staffId},</if>
+            <if test="username != null and username != ''">#{username},</if>
+            <if test="password != null and password != ''">#{password},</if>
             <if test="name != null and name != ''">#{name},</if>
             <if test="gender != null and gender != ''">#{gender},</if>
             <if test="phone != null and phone != ''">#{phone},</if>
             <if test="photo != null and photo != ''">#{photo},</if>
             <if test="staffType != null and staffType != ''">#{staffType},</if>
+            <if test="skills != null and skills != ''">#{skills},</if>
+            <if test="introduction != null and introduction != ''">#{introduction},</if>
             <if test="status != null and status != ''">#{status},</if>
+            <if test="accountStatus != null and accountStatus != ''">#{accountStatus},</if>
             <if test="createTime != null">#{createTime},</if>
          </trim>
     </insert>
@@ -71,12 +87,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <update id="updateStaff" parameterType="Staff">
         update staff
         <trim prefix="SET" suffixOverrides=",">
+            <if test="username != null and username != ''">username = #{username},</if>
+            <if test="password != null and password != ''">password = #{password},</if>
             <if test="name != null and name != ''">name = #{name},</if>
             <if test="gender != null and gender != ''">gender = #{gender},</if>
             <if test="phone != null and phone != ''">phone = #{phone},</if>
             <if test="photo != null and photo != ''">photo = #{photo},</if>
             <if test="staffType != null and staffType != ''">staff_type = #{staffType},</if>
+            <if test="skills != null">skills = #{skills},</if>
+            <if test="introduction != null">introduction = #{introduction},</if>
             <if test="status != null and status != ''">status = #{status},</if>
+            <if test="accountStatus != null and accountStatus != ''">account_status = #{accountStatus},</if>
         </trim>
         where staff_id = #{staffId}
     </update>
