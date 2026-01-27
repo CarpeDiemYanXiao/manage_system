@@ -53,14 +53,13 @@
           size="large"
           style="width: 100%"
         >
-          <el-option label="家庭保洁" value="家庭保洁" />
-          <el-option label="家电清洗" value="家电清洗" />
-          <el-option label="月嫂服务" value="月嫂服务" />
-          <el-option label="育婴师" value="育婴师" />
-          <el-option label="保姆" value="保姆" />
-          <el-option label="老人护理" value="老人护理" />
-          <el-option label="钟点工" value="钟点工" />
-          <el-option label="其他" value="其他" />
+          <el-option label="保洁服务" value="保洁服务" />
+          <el-option label="月嫂育儿" value="月嫂育儿" />
+          <el-option label="老人陪护" value="老人陪护" />
+          <el-option label="厨师服务" value="厨师服务" />
+          <el-option label="宠物护理" value="宠物护理" />
+          <el-option label="维修服务" value="维修服务" />
+          <el-option label="其他服务" value="其他服务" />
         </el-select>
       </el-form-item>
       <el-form-item prop="password">
