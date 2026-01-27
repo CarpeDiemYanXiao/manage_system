@@ -110,8 +110,8 @@ public class SecurityConfig {
                     permitAllUrl.getUrls().forEach(url -> requests.requestMatchers(url).permitAll());
                     // 对于登录login 注册register 验证码captchaImage 允许匿名访问
                     requests.requestMatchers("/login", "/register", "/captchaImage").permitAll()
-                            // 服务人员端登录、注册接口允许匿名访问
-                            .requestMatchers("/staff/login", "/staff/register").permitAll()
+                            // 服务人员端所有接口允许匿名访问（由StaffLoginController自行验证token）
+                            .requestMatchers("/staff/**").permitAll()
                             // 静态资源，可匿名访问
                             .requestMatchers(HttpMethod.GET, "/", "/*.html", "/**.html", "/**.css", "/**.js",
                                     "/profile/**")
@@ -139,4 +139,3 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
-
