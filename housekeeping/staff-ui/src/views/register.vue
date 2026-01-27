@@ -24,6 +24,17 @@
           <template #prefix><svg-icon icon-class="user" class="el-input__icon input-icon" /></template>
         </el-input>
       </el-form-item>
+      <el-form-item prop="gender">
+        <el-select
+          v-model="registerForm.gender"
+          placeholder="请选择性别"
+          size="large"
+          style="width: 100%"
+        >
+          <el-option label="男" value="男" />
+          <el-option label="女" value="女" />
+        </el-select>
+      </el-form-item>
       <el-form-item prop="phone">
         <el-input
           v-model="registerForm.phone"
@@ -106,6 +117,7 @@ const { proxy } = getCurrentInstance()
 const registerForm = ref({
   username: "",
   name: "",
+  gender: "",
   phone: "",
   staffType: "",
   password: "",
@@ -127,6 +139,9 @@ const registerRules = {
   ],
   name: [
     { required: true, trigger: "blur", message: "请输入您的姓名" }
+  ],
+  gender: [
+    { required: true, trigger: "change", message: "请选择您的性别" }
   ],
   phone: [
     { required: true, trigger: "blur", message: "请输入您的手机号" },
