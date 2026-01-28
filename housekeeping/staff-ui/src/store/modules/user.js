@@ -18,7 +18,7 @@ const useUserStore = defineStore(
       introduction: '',
       status: '',
       accountStatus: '',
-      roles: ['staff'],  // 默认角色
+      roles: [],  // 初始为空，登录后设置
       permissions: []
     }),
     actions: {
