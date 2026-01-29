@@ -4,6 +4,10 @@ import com.housekeeping.common.core.controller.BaseController;
 import com.housekeeping.common.core.domain.AjaxResult;
 import com.housekeeping.common.core.page.TableDataInfo;
 import com.housekeeping.common.utils.StringUtils;
+import com.housekeeping.housekeeping.domain.Staff;
+import com.housekeeping.housekeeping.service.IStaffService;
+import com.housekeeping.common.core.domain.entity.SysUser;
+import com.housekeeping.system.service.ISysUserService;
 import com.housekeeping.housekeeping.domain.Assess;
 import com.housekeeping.housekeeping.domain.Reservation;
 import com.housekeeping.housekeeping.service.IAssessService;
@@ -30,6 +34,12 @@ public class StaffOrderController extends BaseController {
 
     @Autowired
     private IAssessService assessService;
+
+    @Autowired
+    private ISysUserService userService;
+
+    @Autowired
+    private IStaffService staffService;
 
     @Value("${token.secret}")
     private String secret;
@@ -185,6 +195,17 @@ public class StaffOrderController extends BaseController {
             return AjaxResult.error("订单状态不正确，无法拒绝");
         }
 
+        // 退还金额给用户
+        if (reservation.getUserId() != null && reservation.getPrice() != null) {
+            SysUser user = userService.selectUserById(reservation.getUserId());
+            if (user != null) {
+                // 如果余额为空，初始化为0
+                double currentBalance = user.getBalance() != null ? user.getBalance() : 0.0;
+                user.setBalance(currentBalance + reservation.getPrice());
+                userService.updateUser(user);
+            }
+        }
+
         // 更新订单状态为已拒绝，并清空员工ID以便重新分配
         Reservation update = new Reservation();
         update.setReservationId(reservationId);
@@ -227,8 +248,16 @@ public class StaffOrderController extends BaseController {
         update.setReservationId(reservationId);
         update.setStatus("已完成");
 
-        return reservationService.updateReservation(update) > 0 ? AjaxResult.success("订单已完成")
-                : AjaxResult.error("操作失败");
+        int result = reservationService.updateReservation(update);
+        if (result > 0) {
+            // 将服务人员状态改为空闲
+            Staff staff = new Staff();
+            staff.setStaffId(staffId);
+            staff.setStatus("空闲");
+            staffService.updateStaff(staff);
+            return AjaxResult.success("订单已完成");
+        }
+        return AjaxResult.error("操作失败");
     }
 
     /**
@@ -298,4 +327,3 @@ public class StaffOrderController extends BaseController {
         }
     }
 }
-
