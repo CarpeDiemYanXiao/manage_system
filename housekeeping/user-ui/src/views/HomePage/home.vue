@@ -87,7 +87,7 @@ const baseUrl = import.meta.env.VITE_APP_BASE_API
 const queryParams = ref({
     pageNum: 1,
     pageSize: 10,
-    toIndex: '推送'
+    goIndex: '推送'
 })
 
 // 优势数据

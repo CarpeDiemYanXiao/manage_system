@@ -19,7 +19,8 @@
           <el-col :span="8">
             <el-statistic title="平均评分">
               <template #default>
-                <el-rate v-model="avgScore" disabled show-score text-color="#ff9900" />
+                <span style="font-size: 24px; font-weight: bold; color: #ff9900;">{{ avgScore }}</span>
+                <span style="color: #999; margin-left: 5px;">/ 5</span>
               </template>
             </el-statistic>
           </el-col>
@@ -49,7 +50,7 @@
                 </div>
               </div>
               <div class="assess-score">
-                <el-rate v-model="assess.score" disabled />
+                <el-rate :model-value="Number(assess.score) || 0" disabled />
               </div>
             </div>
             <div class="assess-content">
@@ -109,8 +110,10 @@ const loadData = async () => {
     
     // 计算平均评分
     if (assessList.value.length > 0) {
-      const totalScore = assessList.value.reduce((sum, a) => sum + (a.score || 0), 0)
+      const totalScore = assessList.value.reduce((sum, a) => sum + (Number(a.score) || 0), 0)
       avgScore.value = Math.round((totalScore / assessList.value.length) * 10) / 10
+    } else {
+      avgScore.value = 0
     }
   } finally {
     loading.value = false

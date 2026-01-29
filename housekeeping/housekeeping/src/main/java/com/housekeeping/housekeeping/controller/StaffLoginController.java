@@ -12,6 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import com.housekeeping.common.config.HousekeepingConfig;
+import com.housekeeping.common.utils.file.FileUploadUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -218,6 +221,35 @@ public class StaffLoginController {
     }
 
     /**
+     * 服务人员上传文件（照片等）
+     */
+    @PostMapping("/upload")
+    public AjaxResult uploadFile(@RequestHeader("Authorization") String token, MultipartFile file) {
+        try {
+            // 验证token
+            if (StringUtils.isEmpty(token)) {
+                return AjaxResult.error("未登录");
+            }
+            if (token.startsWith("Bearer ")) {
+                token = token.substring(7);
+            }
+            // 解析token验证有效性
+            Jwts.parser().setSigningKey(secret).parseClaimsJws(token);
+
+            // 上传文件路径
+            String filePath = HousekeepingConfig.getUploadPath();
+            // 上传并返回新文件名称
+            String fileName = FileUploadUtils.upload(filePath, file);
+            AjaxResult ajax = AjaxResult.success();
+            ajax.put("url", fileName);
+            ajax.put("fileName", fileName);
+            return ajax;
+        } catch (Exception e) {
+            return AjaxResult.error("上传失败：" + e.getMessage());
+        }
+    }
+
+    /**
      * 生成Token
      */
     private String createToken(Staff staff) {
@@ -236,4 +268,3 @@ public class StaffLoginController {
                 .compact();
     }
 }
-

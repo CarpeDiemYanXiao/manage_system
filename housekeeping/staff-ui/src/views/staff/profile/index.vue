@@ -150,7 +150,7 @@ const activeTab = ref('info')
 const loading = ref(false)
 const pwdLoading = ref(false)
 
-const uploadUrl = import.meta.env.VITE_APP_BASE_API + '/common/upload'
+const uploadUrl = import.meta.env.VITE_APP_BASE_API + '/staff/upload'
 const headers = {
   Authorization: 'Bearer ' + getToken()
 }

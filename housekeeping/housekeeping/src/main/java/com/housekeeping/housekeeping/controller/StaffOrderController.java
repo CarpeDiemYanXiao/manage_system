@@ -213,8 +213,16 @@ public class StaffOrderController extends BaseController {
         update.setStaffId(null); // 清空员工ID
         update.setRemark(reason);
 
-        return reservationService.updateReservation(update) > 0 ? AjaxResult.success("已拒绝订单")
-                : AjaxResult.error("操作失败");
+        int result = reservationService.updateReservation(update);
+        if (result > 0) {
+            // 将服务人员状态改为空闲
+            Staff staff = new Staff();
+            staff.setStaffId(staffId);
+            staff.setStatus("空闲");
+            staffService.updateStaff(staff);
+            return AjaxResult.success("已拒绝订单");
+        }
+        return AjaxResult.error("操作失败");
     }
 
     /**
