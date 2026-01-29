@@ -66,14 +66,14 @@ const useUserStore = defineStore(
       // 退出系统
       logOut() {
         return new Promise((resolve) => {
-          logout().finally(() => {
-            this.token = ''
-            this.staffId = ''
-            this.name = ''
-            this.roles = []
-            this.permissions = []
-            removeToken()
+          this.token = ''
+          this.roles = []
+          this.permissions = []
+          removeToken()
+          logout().then(() => {
             resolve()
+          }).catch(() => {
+            resolve() // 即使后端退出失败，前端也视为成功
           })
         })
       }

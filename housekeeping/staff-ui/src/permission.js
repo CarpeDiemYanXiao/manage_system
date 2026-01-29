@@ -29,19 +29,13 @@ router.beforeEach((to, from, next) => {
       if (useUserStore().roles.length === 0) {
         // 判断当前用户是否已拉取完user_info信息
         useUserStore().getInfo().then(() => {
-          usePermissionStore().generateRoutes().then(accessRoutes => {
-            // 根据roles权限生成可访问的路由表
-            accessRoutes.forEach(route => {
-              if (!isHttp(route.path)) {
-                router.addRoute(route) // 动态添加可访问路由表
-              }
-            })
-            next({ ...to, replace: true }) // hack方法 确保addRoutes已完成
-          })
+          // staff-ui 使用静态路由，无需动态生成，直接放行
+          next({ ...to, replace: true }) 
         }).catch(err => {
+          console.error('获取用户信息失败，跳转登录页', err)
           // token 无效，清除并跳转登录页
           useUserStore().logOut().then(() => {
-            next({ path: '/login' })
+            next({ path: '/login', query: { redirect: to.fullPath } })
           })
         })
       } else {
