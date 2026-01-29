@@ -251,10 +251,10 @@ public class StaffOrderController extends BaseController {
             return AjaxResult.error("订单状态不正确，无法完成");
         }
 
-        // 更新订单状态为已完成
+        // 更新订单状态为服务完成（等待用户确认完成）
         Reservation update = new Reservation();
         update.setReservationId(reservationId);
-        update.setStatus("已完成");
+        update.setStatus("服务完成");
 
         int result = reservationService.updateReservation(update);
         if (result > 0) {
@@ -263,7 +263,7 @@ public class StaffOrderController extends BaseController {
             staff.setStaffId(staffId);
             staff.setStatus("空闲");
             staffService.updateStaff(staff);
-            return AjaxResult.success("订单已完成");
+            return AjaxResult.success("服务已完成，等待用户确认");
         }
         return AjaxResult.error("操作失败");
     }
@@ -307,13 +307,7 @@ public class StaffOrderController extends BaseController {
             return AjaxResult.error("未登录");
         }
 
-        startPage();
-        Assess query = new Assess();
-        query.setStaffId(staffId);
-        List<Assess> list = assessService.selectAssessList(query);
-        TableDataInfo dataTable = getDataTable(list);
-
-        // 计算平均评分（从全部数据计算，不受分页影响）
+        // 先查询全部数据计算平均评分（在startPage之前）
         Assess allQuery = new Assess();
         allQuery.setStaffId(staffId);
         List<Assess> allList = assessService.selectAssessList(allQuery);
@@ -322,6 +316,13 @@ public class StaffOrderController extends BaseController {
             double totalScore = allList.stream().mapToDouble(a -> a.getScore() != null ? a.getScore() : 0).sum();
             avgScore = Math.round((totalScore / allList.size()) * 10) / 10.0;
         }
+
+        // 再进行分页查询
+        startPage();
+        Assess query = new Assess();
+        query.setStaffId(staffId);
+        List<Assess> list = assessService.selectAssessList(query);
+        TableDataInfo dataTable = getDataTable(list);
 
         AjaxResult ajax = AjaxResult.success();
         ajax.put("rows", dataTable.getRows());

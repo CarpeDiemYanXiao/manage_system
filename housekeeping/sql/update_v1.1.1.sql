@@ -1,6 +1,6 @@
 -- =====================================================
 -- 华彩家政服务系统 v1.1.1 数据库更新脚本
--- 功能：修复员工注册时字段约束问题
+-- 功能：修复员工注册时字段约束问题，添加服务完成状态
 -- 日期：2025-07-21
 -- 说明：将 staff 表的 photo 字段改为允许 NULL，避免注册时必须上传照片
 -- =====================================================
@@ -13,6 +13,12 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- ----------------------------
 ALTER TABLE `staff` 
 MODIFY COLUMN `photo` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '照片';
+
+-- ----------------------------
+-- 2. 添加"服务完成"状态字典数据
+-- 用于表示服务人员已完成服务，等待用户确认
+-- ----------------------------
+INSERT INTO `sys_dict_data` VALUES (NULL, 8, '服务完成', '服务完成', 'reservation_status', NULL, 'primary', 'N', '0', 'admin', NOW(), '', NULL, '服务人员完成服务，等待用户确认');
 
 SET FOREIGN_KEY_CHECKS = 1;
 

@@ -108,7 +108,7 @@
                                 >
                                     取消预约
                                 </el-button>
-                                <el-button v-if="reservation.status === '待确认'"
+                                <el-button v-if="reservation.status === '服务完成'"
                                            type="success"
                                            size="small"
                                            @click="handleComplete(reservation)"

@@ -171,8 +171,8 @@ public class ReservationController extends BaseController {
             return error("订单不存在");
         }
 
-        // 只有待确认状态的订单才能确认完成
-        if (!"待确认".equals(existingReservation.getStatus())) {
+        // 只有服务完成状态的订单才能确认完成
+        if (!"服务完成".equals(existingReservation.getStatus())) {
             return error("订单状态不正确，无法确认完成");
         }
 

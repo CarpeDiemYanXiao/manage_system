@@ -79,6 +79,7 @@
 import {listBanner} from "@/api/housekeeping/banner.js";
 import {Setting, Star, Trophy, User, List} from "@element-plus/icons-vue";
 import {listAssess} from "@/api/housekeeping/assess.js";
+import {markRaw} from 'vue';
 
 //获取基础API URL
 const baseUrl = import.meta.env.VITE_APP_BASE_API
@@ -90,13 +91,13 @@ const queryParams = ref({
     goIndex: '推送'
 })
 
-// 优势数据
+// 优势数据 - 使用 markRaw 避免将组件变成响应式对象
 const advantages = ref([
-    {id: 1, title: '专业服务', description: '所有服务人员经过严格筛选和专业培训，持证上岗', icon: Star},
-    {id: 2, title: '安全保障', description: '实名认证、背景调查、保险保障，服务更放心', icon: User},
-    {id: 3, title: '明码标价', description: '服务价格透明，无隐形消费，消费更安心', icon: Setting},
-    {id: 4, title: '严格标准', description: '标准化服务流程，服务质量有保障', icon: List},
-    {id: 5, title: '售后无忧', description: '服务不满意可申请售后，平台全程保障', icon: Trophy}
+    {id: 1, title: '专业服务', description: '所有服务人员经过严格筛选和专业培训，持证上岗', icon: markRaw(Star)},
+    {id: 2, title: '安全保障', description: '实名认证、背景调查、保险保障，服务更放心', icon: markRaw(User)},
+    {id: 3, title: '明码标价', description: '服务价格透明，无隐形消费，消费更安心', icon: markRaw(Setting)},
+    {id: 4, title: '严格标准', description: '标准化服务流程，服务质量有保障', icon: markRaw(List)},
+    {id: 5, title: '售后无忧', description: '服务不满意可申请售后，平台全程保障', icon: markRaw(Trophy)}
 ])
 
 //轮播图列表数据
