@@ -42,8 +42,9 @@ router.beforeEach((to, from, next) => {
             next({ ...to, replace: true }) // hack方法 确保addRoutes已完成
           })
         }).catch(err => {
+          isRelogin.show = false
           useUserStore().logOut().then(() => {
-            ElMessage.error(err)
+            ElMessage.error(err || '登录状态已过期')
             next({ path: '/login' })
           })
         })

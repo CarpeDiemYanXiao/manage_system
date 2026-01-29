@@ -65,8 +65,8 @@ const useUserStore = defineStore(
       },
       // 退出系统
       logOut() {
-        return new Promise((resolve, reject) => {
-          logout().then(() => {
+        return new Promise((resolve) => {
+          logout().finally(() => {
             this.token = ''
             this.staffId = ''
             this.name = ''
@@ -74,8 +74,6 @@ const useUserStore = defineStore(
             this.permissions = []
             removeToken()
             resolve()
-          }).catch(error => {
-            reject(error)
           })
         })
       }
