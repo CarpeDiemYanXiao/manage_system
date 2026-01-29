@@ -13,9 +13,9 @@
       <el-table :data="orderList" style="width: 100%" v-loading="loading" border>
         <el-table-column prop="reservationId" label="订单号" width="180" />
         <el-table-column prop="serveName" label="服务项目" width="120" />
-        <el-table-column prop="customerName" label="客户姓名" width="100" />
-        <el-table-column prop="customerPhone" label="联系电话" width="120" />
-        <el-table-column prop="serviceTime" label="服务时间" width="180" />
+        <el-table-column prop="contacts" label="客户姓名" width="100" />
+        <el-table-column prop="phone" label="联系电话" width="120" />
+        <el-table-column prop="time" label="服务时间" width="180" />
         <el-table-column prop="address" label="服务地址" min-width="200" show-overflow-tooltip />
         <el-table-column prop="price" label="服务金额" width="100">
           <template #default="scope">
@@ -50,9 +50,9 @@
       <el-descriptions :column="2" border v-if="currentOrder">
         <el-descriptions-item label="订单号">{{ currentOrder.reservationId }}</el-descriptions-item>
         <el-descriptions-item label="服务项目">{{ currentOrder.serveName }}</el-descriptions-item>
-        <el-descriptions-item label="客户姓名">{{ currentOrder.customerName }}</el-descriptions-item>
-        <el-descriptions-item label="联系电话">{{ currentOrder.customerPhone }}</el-descriptions-item>
-        <el-descriptions-item label="服务时间">{{ currentOrder.serviceTime }}</el-descriptions-item>
+        <el-descriptions-item label="客户姓名">{{ currentOrder.contacts }}</el-descriptions-item>
+        <el-descriptions-item label="联系电话">{{ currentOrder.phone }}</el-descriptions-item>
+        <el-descriptions-item label="服务时间">{{ currentOrder.time }}</el-descriptions-item>
         <el-descriptions-item label="服务金额">¥{{ currentOrder.price }}</el-descriptions-item>
         <el-descriptions-item label="服务地址" :span="2">{{ currentOrder.address }}</el-descriptions-item>
         <el-descriptions-item label="备注" :span="2">{{ currentOrder.remark || '无' }}</el-descriptions-item>

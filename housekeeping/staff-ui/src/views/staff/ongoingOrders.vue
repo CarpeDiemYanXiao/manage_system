@@ -13,9 +13,9 @@
       <el-table :data="orderList" style="width: 100%" v-loading="loading" border>
         <el-table-column prop="reservationId" label="订单号" width="180" />
         <el-table-column prop="serveName" label="服务项目" width="120" />
-        <el-table-column prop="customerName" label="客户姓名" width="100" />
-        <el-table-column prop="customerPhone" label="联系电话" width="120" />
-        <el-table-column prop="serviceTime" label="服务时间" width="180" />
+        <el-table-column prop="contacts" label="客户姓名" width="100" />
+        <el-table-column prop="phone" label="联系电话" width="120" />
+        <el-table-column prop="time" label="服务时间" width="180" />
         <el-table-column prop="address" label="服务地址" min-width="200" show-overflow-tooltip />
         <el-table-column prop="price" label="服务金额" width="100">
           <template #default="scope">
@@ -78,7 +78,7 @@ const handleComplete = (row) => {
   ElMessageBox.confirm(
     `确认订单 [${row.reservationId}] 已完成吗？
     服务项目：${row.serveName}
-    客户：${row.customerName}`,
+    客户：${row.contacts}`,
     '确认完成',
     {
       confirmButtonText: '确认完成',
