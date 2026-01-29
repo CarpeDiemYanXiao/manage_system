@@ -4,7 +4,6 @@ import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 import { getToken } from '@/utils/auth'
 import { isHttp, isPathMatch } from '@/utils/validate'
-import { isRelogin } from '@/utils/request'
 import useUserStore from '@/store/modules/user'
 import useSettingsStore from '@/store/modules/settings'
 import usePermissionStore from '@/store/modules/permission'
@@ -28,10 +27,8 @@ router.beforeEach((to, from, next) => {
       NProgress.done()
     } else {
       if (useUserStore().roles.length === 0) {
-        isRelogin.show = true
         // 判断当前用户是否已拉取完user_info信息
         useUserStore().getInfo().then(() => {
-          isRelogin.show = false
           usePermissionStore().generateRoutes().then(accessRoutes => {
             // 根据roles权限生成可访问的路由表
             accessRoutes.forEach(route => {
@@ -42,9 +39,8 @@ router.beforeEach((to, from, next) => {
             next({ ...to, replace: true }) // hack方法 确保addRoutes已完成
           })
         }).catch(err => {
-          isRelogin.show = false
+          // token 无效，清除并跳转登录页
           useUserStore().logOut().then(() => {
-            ElMessage.error(err || '登录状态已过期')
             next({ path: '/login' })
           })
         })
