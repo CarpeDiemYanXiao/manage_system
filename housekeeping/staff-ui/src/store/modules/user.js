@@ -12,6 +12,7 @@ const useUserStore = defineStore(
       name: '',
       username: '',
       avatar: '',
+      photo: '',  // 个人照片（原始路径）
       phone: '',
       staffType: '',
       skills: '',
@@ -42,6 +43,7 @@ const useUserStore = defineStore(
           getInfo().then(res => {
             const staff = res.staff
             let avatar = staff.photo || ""
+            this.photo = staff.photo || ""  // 保存原始路径
             if (!isHttp(avatar)) {
               avatar = (isEmpty(avatar)) ? defAva : import.meta.env.VITE_APP_BASE_API + avatar
             }

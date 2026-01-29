@@ -76,9 +76,9 @@
       <el-table :data="pendingOrders" style="width: 100%" v-loading="loading">
         <el-table-column prop="reservationId" label="订单号" width="180" />
         <el-table-column prop="serveName" label="服务项目" />
-        <el-table-column prop="customerName" label="客户姓名" />
-        <el-table-column prop="customerPhone" label="联系电话" />
-        <el-table-column prop="serviceTime" label="服务时间" width="180" />
+        <el-table-column prop="contacts" label="客户姓名" />
+        <el-table-column prop="phone" label="联系电话" />
+        <el-table-column prop="time" label="服务时间" width="180" />
         <el-table-column prop="address" label="服务地址" />
         <el-table-column label="操作" width="180">
           <template #default="scope">
@@ -100,9 +100,9 @@
       <el-table :data="ongoingOrders" style="width: 100%" v-loading="loading">
         <el-table-column prop="reservationId" label="订单号" width="180" />
         <el-table-column prop="serveName" label="服务项目" />
-        <el-table-column prop="customerName" label="客户姓名" />
-        <el-table-column prop="customerPhone" label="联系电话" />
-        <el-table-column prop="serviceTime" label="服务时间" width="180" />
+        <el-table-column prop="contacts" label="客户姓名" />
+        <el-table-column prop="phone" label="联系电话" />
+        <el-table-column prop="time" label="服务时间" width="180" />
         <el-table-column prop="address" label="服务地址" />
         <el-table-column label="操作" width="100">
           <template #default="scope">

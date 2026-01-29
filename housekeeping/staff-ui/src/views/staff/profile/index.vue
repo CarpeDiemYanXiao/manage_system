@@ -51,6 +51,32 @@
             <!-- 基本信息 -->
             <el-tab-pane label="基本信息" name="info">
               <el-form ref="infoFormRef" :model="infoForm" :rules="infoRules" label-width="100px">
+                <el-form-item label="个人照片">
+                  <div class="photo-upload-container">
+                    <el-image 
+                      v-if="infoForm.photo" 
+                      :src="getPhotoUrl(infoForm.photo)" 
+                      :preview-src-list="[getPhotoUrl(infoForm.photo)]"
+                      fit="cover"
+                      style="width: 150px; height: 150px; border-radius: 8px;"
+                    />
+                    <div v-else class="photo-placeholder">
+                      <el-icon :size="40"><Picture /></el-icon>
+                      <span>暂无照片</span>
+                    </div>
+                    <el-upload
+                      class="photo-uploader"
+                      :action="uploadUrl"
+                      :headers="headers"
+                      :show-file-list="false"
+                      :on-success="handlePhotoSuccess"
+                      accept="image/*"
+                    >
+                      <el-button size="small" type="primary">上传个人照片</el-button>
+                    </el-upload>
+                    <div class="photo-tip">此照片将展示给用户，请上传清晰的个人形象照</div>
+                  </div>
+                </el-form-item>
                 <el-form-item label="姓名" prop="name">
                   <el-input v-model="infoForm.name" placeholder="请输入姓名" />
                 </el-form-item>
@@ -116,6 +142,7 @@ import { updateInfo, updatePwd } from '@/api/login'
 import useUserStore from '@/store/modules/user'
 import { ElMessage } from 'element-plus'
 import { getToken } from '@/utils/auth'
+import { Picture } from '@element-plus/icons-vue'
 
 const userStore = useUserStore()
 
@@ -136,8 +163,30 @@ const infoForm = reactive({
   phone: '',
   gender: '',
   skills: '',
-  introduction: ''
+  introduction: '',
+  photo: ''
 })
+
+// 获取照片完整URL
+const getPhotoUrl = (photo) => {
+  if (!photo) return ''
+  if (photo.startsWith('http')) return photo
+  return import.meta.env.VITE_APP_BASE_API + photo
+}
+
+// 照片上传成功
+const handlePhotoSuccess = (response) => {
+  if (response.code === 200) {
+    infoForm.photo = response.fileName
+    // 立即保存照片
+    updateInfo({ photo: response.fileName }).then(() => {
+      ElMessage.success('照片上传成功')
+      userStore.getInfo()
+    })
+  } else {
+    ElMessage.error('照片上传失败')
+  }
+}
 
 const pwdForm = reactive({
   oldPassword: '',
@@ -179,6 +228,7 @@ onMounted(() => {
   infoForm.phone = userStore.phone
   infoForm.skills = userStore.skills
   infoForm.introduction = userStore.introduction
+  infoForm.photo = userStore.photo || ''
 })
 
 const handleAvatarSuccess = (response) => {
@@ -247,5 +297,34 @@ const resetPwdForm = () => {
 
 .avatar-uploader {
   margin-top: 10px;
+}
+
+.photo-upload-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.photo-placeholder {
+  width: 150px;
+  height: 150px;
+  border: 2px dashed #dcdfe6;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #909399;
+}
+
+.photo-placeholder span {
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.photo-tip {
+  font-size: 12px;
+  color: #909399;
 }
 </style>
