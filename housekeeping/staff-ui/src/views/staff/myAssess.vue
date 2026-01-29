@@ -108,13 +108,8 @@ const loadData = async () => {
     assessList.value = res.rows || []
     total.value = res.total || 0
     
-    // 计算平均评分
-    if (assessList.value.length > 0) {
-      const totalScore = assessList.value.reduce((sum, a) => sum + (Number(a.score) || 0), 0)
-      avgScore.value = Math.round((totalScore / assessList.value.length) * 10) / 10
-    } else {
-      avgScore.value = 0
-    }
+    // 使用后端返回的平均评分（基于全部数据计算）
+    avgScore.value = res.avgScore || 0
   } finally {
     loading.value = false
   }

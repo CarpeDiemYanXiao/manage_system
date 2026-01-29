@@ -301,17 +301,34 @@ public class StaffOrderController extends BaseController {
      * 查询我的所有评价列表
      */
     @GetMapping("/myAssess")
-    public TableDataInfo myAssessList(@RequestHeader("Authorization") String token) {
+    public AjaxResult myAssessList(@RequestHeader("Authorization") String token) {
         String staffId = getStaffIdFromToken(token);
         if (staffId == null) {
-            return getDataTable(List.of());
+            return AjaxResult.error("未登录");
         }
 
         startPage();
         Assess query = new Assess();
         query.setStaffId(staffId);
         List<Assess> list = assessService.selectAssessList(query);
-        return getDataTable(list);
+        TableDataInfo dataTable = getDataTable(list);
+
+        // 计算平均评分（从全部数据计算，不受分页影响）
+        Assess allQuery = new Assess();
+        allQuery.setStaffId(staffId);
+        List<Assess> allList = assessService.selectAssessList(allQuery);
+        double avgScore = 0;
+        if (!allList.isEmpty()) {
+            double totalScore = allList.stream().mapToDouble(a -> a.getScore() != null ? a.getScore() : 0).sum();
+            avgScore = Math.round((totalScore / allList.size()) * 10) / 10.0;
+        }
+
+        AjaxResult ajax = AjaxResult.success();
+        ajax.put("rows", dataTable.getRows());
+        ajax.put("total", dataTable.getTotal());
+        ajax.put("avgScore", avgScore);
+        ajax.put("totalCount", allList.size());
+        return ajax;
     }
 
     /**

@@ -121,6 +121,7 @@
                   border v-loading="loading" :data="reservationList" @selection-change="handleSelectionChange">
             <el-table-column type="selection" width="55" align="center"/>
             <el-table-column label="序号" align="center" type="index" :index="indexMethod"/>
+            <el-table-column label="订单编号" align="center" prop="reservationId" width="280" :show-overflow-tooltip="true"/>
             <el-table-column label="服务名称" align="center" prop="serveName"/>
             <el-table-column label="预约服务时间" align="center" prop="time" width="180">
                 <template #default="scope">
