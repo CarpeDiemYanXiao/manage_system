@@ -13,18 +13,10 @@
       <!-- 评价统计 -->
       <div class="assess-stats">
         <el-row :gutter="20">
-          <el-col :span="8">
+          <el-col :span="12">
             <el-statistic title="总评价数" :value="total" />
           </el-col>
-          <el-col :span="8">
-            <el-statistic title="平均评分">
-              <template #default>
-                <span style="font-size: 24px; font-weight: bold; color: #ff9900;">{{ avgScore }}</span>
-                <span style="color: #999; margin-left: 5px;">/ 5</span>
-              </template>
-            </el-statistic>
-          </el-col>
-          <el-col :span="8">
+          <el-col :span="12">
             <el-statistic title="好评率" :value="goodRate" suffix="%" />
           </el-col>
         </el-row>
