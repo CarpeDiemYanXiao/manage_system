@@ -329,14 +329,18 @@ public class StaffOrderController extends BaseController {
         allQuery.setStaffId(staffId);
         List<Assess> allList = assessService.selectAssessList(allQuery);
         double avgScore = 0;
+        int validCount = 0;
+        double totalScore = 0;
         if (!allList.isEmpty()) {
-            // 过滤掉score为null的记录
-            List<Assess> validList = allList.stream()
-                    .filter(a -> a.getScore() != null && a.getScore() > 0)
-                    .toList();
-            if (!validList.isEmpty()) {
-                double totalScore = validList.stream().mapToDouble(Assess::getScore).sum();
-                avgScore = Math.round((totalScore / validList.size()) * 10) / 10.0;
+            for (Assess assess : allList) {
+                Double scoreVal = assess.getScore();
+                if (scoreVal != null && scoreVal > 0) {
+                    totalScore += scoreVal;
+                    validCount++;
+                }
+            }
+            if (validCount > 0) {
+                avgScore = Math.round((totalScore / validCount) * 10.0) / 10.0;
             }
         }
 
@@ -350,8 +354,10 @@ public class StaffOrderController extends BaseController {
         AjaxResult ajax = AjaxResult.success();
         ajax.put("rows", dataTable.getRows());
         ajax.put("total", dataTable.getTotal());
-        ajax.put("avgScore", avgScore);
+        ajax.put("avgScore", Double.valueOf(avgScore));
         ajax.put("totalCount", allList.size());
+        ajax.put("validCount", validCount);
+        ajax.put("totalScoreSum", totalScore);
         return ajax;
     }
 
