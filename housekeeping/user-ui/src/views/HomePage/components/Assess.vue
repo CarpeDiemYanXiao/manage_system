@@ -42,6 +42,9 @@ const submitForm = () => {
             addAssess(form.value).then(response => {
                 proxy.$modal.msgSuccess("评价成功!")
                 open.value = false
+            }).catch(error => {
+                // 处理重复评价等错误
+                proxy.$modal.msgError(error.msg || "评价失败")
             })
         }
     })

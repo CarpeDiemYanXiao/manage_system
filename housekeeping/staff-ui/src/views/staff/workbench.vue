@@ -118,7 +118,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Bell, Timer, CircleCheck } from '@element-plus/icons-vue'
-import { listPendingOrders, listOngoingOrders, acceptOrder, rejectOrder, completeOrder } from '@/api/order'
+import { listPendingOrders, listOngoingOrders, acceptOrder, rejectOrder, completeOrder, getCompletedCount } from '@/api/order'
 import useUserStore from '@/store/modules/user'
 import { ElMessageBox, ElMessage } from 'element-plus'
 
@@ -151,8 +151,9 @@ const loadData = async () => {
     ongoingOrders.value = ongoingRes.rows || []
     stats.value.ongoingCount = ongoingRes.total || 0
 
-    // 这里可以加载已完成订单数量
-    stats.value.completedCount = 0  // 暂时设为0
+    // 加载已完成订单数量
+    const completedRes = await getCompletedCount()
+    stats.value.completedCount = completedRes.data || 0
   } finally {
     loading.value = false
   }

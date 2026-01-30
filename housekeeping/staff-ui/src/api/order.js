@@ -76,3 +76,11 @@ export function listMyAssess(query) {
     params: query
   })
 }
+
+// 获取已完成订单数量
+export function getCompletedCount() {
+  return request({
+    url: '/staff/order/completedCount',
+    method: 'get'
+  })
+}

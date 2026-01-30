@@ -111,6 +111,23 @@ public class StaffOrderController extends BaseController {
     }
 
     /**
+     * 获取已完成订单数量
+     */
+    @GetMapping("/completedCount")
+    public AjaxResult getCompletedCount(@RequestHeader("Authorization") String token) {
+        String staffId = getStaffIdFromToken(token);
+        if (staffId == null) {
+            return AjaxResult.error("未登录");
+        }
+
+        Reservation query = new Reservation();
+        query.setStaffId(staffId);
+        query.setStatus("已完成");
+        List<Reservation> list = reservationService.selectReservationList(query);
+        return AjaxResult.success(list.size());
+    }
+
+    /**
      * 获取订单详情
      */
     @GetMapping("/{reservationId}")
@@ -313,8 +330,14 @@ public class StaffOrderController extends BaseController {
         List<Assess> allList = assessService.selectAssessList(allQuery);
         double avgScore = 0;
         if (!allList.isEmpty()) {
-            double totalScore = allList.stream().mapToDouble(a -> a.getScore() != null ? a.getScore() : 0).sum();
-            avgScore = Math.round((totalScore / allList.size()) * 10) / 10.0;
+            // 过滤掉score为null的记录
+            List<Assess> validList = allList.stream()
+                    .filter(a -> a.getScore() != null && a.getScore() > 0)
+                    .toList();
+            if (!validList.isEmpty()) {
+                double totalScore = validList.stream().mapToDouble(Assess::getScore).sum();
+                avgScore = Math.round((totalScore / validList.size()) * 10) / 10.0;
+            }
         }
 
         // 再进行分页查询
