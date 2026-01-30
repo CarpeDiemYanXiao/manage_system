@@ -332,33 +332,21 @@ public class StaffOrderController extends BaseController {
         List<Assess> list = assessService.selectAssessList(query);
         TableDataInfo dataTable = getDataTable(list);
 
-        // 清除分页，重新查询全部数据计算平均评分
-        PageHelper.clearPage();
-        Assess allQuery = new Assess();
-        allQuery.setStaffId(staffId);
-        List<Assess> allList = assessService.selectAssessList(allQuery);
-
-        double avgScore = 0;
-        int validCount = 0;
-        double totalScore = 0;
-        if (allList != null && !allList.isEmpty()) {
-            for (Assess assess : allList) {
-                Double scoreVal = assess.getScore();
-                if (scoreVal != null && scoreVal > 0) {
-                    totalScore += scoreVal;
-                    validCount++;
-                }
-            }
-            if (validCount > 0) {
-                avgScore = Math.round((totalScore / validCount) * 10.0) / 10.0;
-            }
+        // 使用SQL直接计算平均评分，避免分页和List对象操作的问题
+        Double avgScore = assessService.selectAssessAvgScore(staffId);
+        if (avgScore == null) {
+            avgScore = 0.0;
+        } else {
+            // 保留一位小数
+            avgScore = Math.round(avgScore * 10.0) / 10.0;
         }
 
         AjaxResult ajax = AjaxResult.success();
         ajax.put("rows", dataTable.getRows());
         ajax.put("total", dataTable.getTotal());
         ajax.put("avgScore", avgScore);
-        ajax.put("totalCount", allList != null ? allList.size() : 0);
+        // 为了兼容前端可能的totalCount依赖，虽然现在totalCount其实不准了(只是分页后的count)，但前端total用的是dataTable的total
+        ajax.put("totalCount", dataTable.getTotal());
         return ajax;
     }
 

@@ -9,8 +9,7 @@ import com.housekeeping.housekeeping.domain.Assess;
  * @author Housekeeping
  * @date 2025-07-20
  */
-public interface IAssessService
-{
+public interface IAssessService {
     /**
      * 查询评价
      *
@@ -66,5 +65,12 @@ public interface IAssessService
      * @return 结果
      */
     public int deleteAssessByAssessId(String assessId);
-}
 
+    /**
+     * 查询服务人员的平均评分
+     *
+     * @param staffId 服务人员ID
+     * @return 平均评分
+     */
+    public Double selectAssessAvgScore(String staffId);
+}

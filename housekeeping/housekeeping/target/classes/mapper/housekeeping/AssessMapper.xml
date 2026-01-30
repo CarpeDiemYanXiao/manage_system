@@ -88,5 +88,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{assessId}
         </foreach>
     </delete>
+
+    <select id="selectAssessAvgScore" parameterType="String" resultType="Double">
+        select IFNULL(AVG(a.score), 0)
+        from assess a
+        left join reservation r on a.reservation_id = r.reservation_id
+        where r.staff_id = #{staffId} and a.score > 0
+    </select>
 </mapper>
 

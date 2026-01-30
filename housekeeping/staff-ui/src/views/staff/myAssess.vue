@@ -4,7 +4,7 @@
       <template #header>
         <div class="card-header">
           <span>我的评价</span>
-          <el-button type="primary" @click="loadData">
+          <el-button type="primary" link @click="loadData">
             <el-icon><Refresh /></el-icon> 刷新
           </el-button>
         </div>
@@ -109,18 +109,9 @@ const loadData = async () => {
     assessList.value = res.rows || []
     total.value = res.total || 0
     
-    // 优先使用后端返回的平均评分，如果后端返回0则前端计算
-    if (res.avgScore && res.avgScore > 0) {
+    // 优先使用后端返回的平均评分
+    if (res.avgScore != null) {
       avgScore.value = res.avgScore
-    } else if (assessList.value.length > 0) {
-      // 前端计算平均评分
-      let validScores = assessList.value.filter(a => a.score != null && Number(a.score) > 0)
-      if (validScores.length > 0) {
-        let sum = validScores.reduce((acc, a) => acc + Number(a.score), 0)
-        avgScore.value = Math.round((sum / validScores.length) * 10) / 10
-      } else {
-        avgScore.value = 0
-      }
     } else {
       avgScore.value = 0
     }

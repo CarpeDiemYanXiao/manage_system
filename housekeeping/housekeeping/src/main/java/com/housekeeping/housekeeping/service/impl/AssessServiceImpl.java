@@ -129,5 +129,15 @@ public class AssessServiceImpl implements IAssessService {
     public int deleteAssessByAssessId(String assessId) {
         return assessMapper.deleteAssessByAssessId(assessId);
     }
-}
 
+    /**
+     * 查询服务人员的平均评分
+     *
+     * @param staffId 服务人员ID
+     * @return 平均评分
+     */
+    @Override
+    public Double selectAssessAvgScore(String staffId) {
+        return assessMapper.selectAssessAvgScore(staffId);
+    }
+}
