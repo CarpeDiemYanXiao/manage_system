@@ -84,7 +84,15 @@ import Pagination from '@/components/Pagination/index.vue'
 const loading = ref(false)
 const assessList = ref([])
 const total = ref(0)
-const avgScore = ref(0)
+const avgScore = computed(() => {
+  if (assessList.value.length === 0) return 0
+  const validScores = assessList.value
+    .map(item => Number(item.score))
+    .filter(score => !Number.isNaN(score) && score > 0)
+  if (validScores.length === 0) return 0
+  const sum = validScores.reduce((acc, val) => acc + val, 0)
+  return Math.round((sum / validScores.length) * 10) / 10
+})
 
 const queryParams = ref({
   pageNum: 1,
@@ -109,12 +117,7 @@ const loadData = async () => {
     assessList.value = res.rows || []
     total.value = res.total || 0
     
-    // 优先使用后端返回的平均评分
-    if (res.avgScore != null) {
-      avgScore.value = res.avgScore
-    } else {
-      avgScore.value = 0
-    }
+    // 平均评分改为由computed基于列表自动计算
   } finally {
     loading.value = false
   }
