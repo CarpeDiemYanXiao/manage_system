@@ -1,5 +1,6 @@
 package com.housekeeping.housekeeping.controller;
 
+import com.github.pagehelper.PageHelper;
 import com.housekeeping.common.core.controller.BaseController;
 import com.housekeeping.common.core.domain.AjaxResult;
 import com.housekeeping.common.core.page.TableDataInfo;
@@ -324,14 +325,23 @@ public class StaffOrderController extends BaseController {
             return AjaxResult.error("未登录");
         }
 
-        // 先查询全部数据计算平均评分（在startPage之前）
+        // 先进行分页查询
+        startPage();
+        Assess query = new Assess();
+        query.setStaffId(staffId);
+        List<Assess> list = assessService.selectAssessList(query);
+        TableDataInfo dataTable = getDataTable(list);
+
+        // 清除分页，重新查询全部数据计算平均评分
+        PageHelper.clearPage();
         Assess allQuery = new Assess();
         allQuery.setStaffId(staffId);
         List<Assess> allList = assessService.selectAssessList(allQuery);
+
         double avgScore = 0;
         int validCount = 0;
         double totalScore = 0;
-        if (!allList.isEmpty()) {
+        if (allList != null && !allList.isEmpty()) {
             for (Assess assess : allList) {
                 Double scoreVal = assess.getScore();
                 if (scoreVal != null && scoreVal > 0) {
@@ -344,20 +354,11 @@ public class StaffOrderController extends BaseController {
             }
         }
 
-        // 再进行分页查询
-        startPage();
-        Assess query = new Assess();
-        query.setStaffId(staffId);
-        List<Assess> list = assessService.selectAssessList(query);
-        TableDataInfo dataTable = getDataTable(list);
-
         AjaxResult ajax = AjaxResult.success();
         ajax.put("rows", dataTable.getRows());
         ajax.put("total", dataTable.getTotal());
-        ajax.put("avgScore", Double.valueOf(avgScore));
-        ajax.put("totalCount", allList.size());
-        ajax.put("validCount", validCount);
-        ajax.put("totalScoreSum", totalScore);
+        ajax.put("avgScore", avgScore);
+        ajax.put("totalCount", allList != null ? allList.size() : 0);
         return ajax;
     }
 

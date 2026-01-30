@@ -92,8 +92,9 @@ const queryParams = ref({
 })
 
 const goodRate = computed(() => {
-  if (assessList.value.length === 0) return 0
-  const goodCount = assessList.value.filter(a => a.score >= 4).length
+  if (total.value === 0) return 0
+  const goodCount = assessList.value.filter(a => Number(a.score) >= 4).length
+  // 使用总评价数计算好评率（基于当前页面数据估算）
   return Math.round((goodCount / assessList.value.length) * 100)
 })
 
@@ -108,8 +109,21 @@ const loadData = async () => {
     assessList.value = res.rows || []
     total.value = res.total || 0
     
-    // 使用后端返回的平均评分（基于全部数据计算）
-    avgScore.value = res.avgScore || 0
+    // 优先使用后端返回的平均评分，如果后端返回0则前端计算
+    if (res.avgScore && res.avgScore > 0) {
+      avgScore.value = res.avgScore
+    } else if (assessList.value.length > 0) {
+      // 前端计算平均评分
+      let validScores = assessList.value.filter(a => a.score != null && Number(a.score) > 0)
+      if (validScores.length > 0) {
+        let sum = validScores.reduce((acc, a) => acc + Number(a.score), 0)
+        avgScore.value = Math.round((sum / validScores.length) * 10) / 10
+      } else {
+        avgScore.value = 0
+      }
+    } else {
+      avgScore.value = 0
+    }
   } finally {
     loading.value = false
   }
